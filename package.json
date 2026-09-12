@@ -10,7 +10,13 @@
   "bugs": {
     "url": "https://github.com/Kevin-SalazarG/nessie-node-sdk/issues"
   },
-  "keywords": ["nessie", "capital-one", "sdk", "nodejs", "typescript"],
+  "keywords": [
+    "nessie",
+    "capital-one",
+    "sdk",
+    "nodejs",
+    "typescript"
+  ],
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -57,6 +63,7 @@
   "files": [
     "dist",
     "README.md",
+    "CONTRIBUTING.md",
     "LICENSE",
     "docs",
     "spec/nessie-openapi.yaml"

@@ -76,6 +76,22 @@ const invalid: AccountCreate = { ...account, balance: "10" };
 void [result, creation, invalid, NessieHttpError];
 `;
 for (const ext of ["mts", "cts"]) writeFileSync(join(consumer, `consumer.${ext}`), types);
+const readmeExamples = [];
+const readme = readFileSync(join(root, "README.md"), "utf8");
+for (const [index, match] of Array.from(
+  readme.matchAll(/^```(?:ts|js)\n([\s\S]*?)^```/gm),
+).entries()) {
+  const source = match[1];
+  const extension = source.includes("require(") ? "cts" : "mts";
+  const path = join(consumer, `readme-${index}.${extension}`);
+  const needsClient = /\bnessie\./.test(source) && !/\bconst nessie\s*=/.test(source);
+  const setup = needsClient
+    ? 'import { NessieClient } from "nessie-node-sdk";\nconst nessie = new NessieClient({ apiKey: "test-key" });\n'
+    : "";
+  writeFileSync(path, setup + source);
+  readmeExamples.push(path);
+}
+assert(readmeExamples.length > 0, "README must include compilable examples.");
 run(
   process.execPath,
   [
@@ -87,8 +103,13 @@ run(
     "NodeNext",
     "--target",
     "ES2022",
+    "--types",
+    "node",
+    "--typeRoots",
+    join(root, "node_modules/@types"),
     join(consumer, "consumer.mts"),
     join(consumer, "consumer.cts"),
+    ...readmeExamples,
   ],
   consumer,
 );
@@ -106,6 +127,6 @@ for (const path of declarations) {
 }
 assert(declarations.length > 0);
 console.log(
-  "Package verified: isolated installation, ESM, CommonJS, subpath exports and published types.",
+  "Package verified: isolated installation, ESM, CommonJS, subpath exports, published types and README examples.",
 );
 console.log(`Consumer fixture retained at ${dirname(tarball)}`);
